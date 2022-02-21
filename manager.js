@@ -19,7 +19,7 @@ const db = new Database("./database.json")
  */
 module.exports.Manager = (client, interaction,options = {giveawayOption: {prize: '', time: 0, channel: null}, button: {emoji: "🎉", StartStyle: "SUCCESS", EndStyle: "DANGER"}, embed: {StartColor: "GREEN", EndColor: "BLURPLE"}}) => {
     options = {giveawayOption: {prize: '', time: 0, channel: null}, button: {emoji: "🎉", StartStyle: "SUCCESS", EndStyle: "DANGER"}, embed: {StartColor: "GREEN", EndColor: "BLURPLE"}}
-    
+        if(!interaction.isCommand())return;
     let time1 = interaction.options.getString('time')
 
     let prize = interaction.options.getString('prize')
@@ -28,13 +28,13 @@ module.exports.Manager = (client, interaction,options = {giveawayOption: {prize:
 
     const JoinGiveawayButton = new MessageButton()
 
-    .setEmoji(options.emoji)
+    .setEmoji(options.button.emoji)
 
     .setCustomId("jg")
 
     .setStyle("SUCCESS")
 
-    .setLabel("join giveaway")
+    .setLabel("Join Giveaway")
 
     const endButton = new MessageButton()
 
@@ -75,23 +75,6 @@ module.exports.Manager = (client, interaction,options = {giveawayOption: {prize:
     channel.send({"embeds": [embed], components: [row]}).then(r => {
     
         db.set(`giveawayTime_${r.id}`, Date.now() +time)
-        setInterval(() =>{
-        
-            let parsed = parse(time) ;
-
-            let parsedTime = `${parsed.days} days, ${parsed.hours} hours, ${parsed.minutes} minutes, ${parsed.seconds} seconds`
-
-            const TimeEmbed = new MessageEmbed()
-
-            .setTitle(prize)
-        
-            .setColor(options.embed.StartColor)
-        
-            .setDescription(`Ending In ${parsedTime} or ${Builder.time(db.get(`giveawayTime_${r.id}`))}\n\nPress ${options.button.emoji} to enter the giveaway\n\n**Hosted By <@${interaction.user.id}>**`)
-
-            r.edit({"embeds": [TimeEmbed], components: [row]})
-
-        })
 
         const collector = r.channel.createMessageComponentCollector({"componentType": "BUTTON", time: time})
 
@@ -145,7 +128,7 @@ module.exports.Manager = (client, interaction,options = {giveawayOption: {prize:
                 
                 const EndGiveawayButton1 = new MessageButton()
 
-                .setEmoji(options.emoji)
+                .setEmoji(options.button.emoji)
             
                 .setCustomId("jg")
             
@@ -187,7 +170,7 @@ module.exports.Manager = (client, interaction,options = {giveawayOption: {prize:
 
                 const EndGiveawayButton = new MessageButton()
 
-                .setEmoji(options.emoji)
+                .setEmoji(options.button.emoji)
             
                 .setCustomId("jg")
             
@@ -204,14 +187,14 @@ module.exports.Manager = (client, interaction,options = {giveawayOption: {prize:
                 .setCustomId("rr")
 
                 .setStyle("PRIMARY")
-
+                
                 const rowA = new MessageActionRow()
 
                 .addComponents(EndGiveawayButton, rerollButton)
 
-                r.edit({embeds: [winEmbed], 'components': [rowA]})
+                r.edit({embeds: [winEmbed], 'components': [rowA]}).then(console.log("send"))
 
-                r.reply({content: `<@${winner}> you have won ${options.giveawayOption.prize}`})
+                r.channel.send({content: `<@${winner}> you have won ${options.giveawayOption.prize}`})
 
                 const rr = r.channel.createMessageComponentCollector({"time": 1000 * 60 * 60 * 24, "componentType": "BUTTON"})
 
